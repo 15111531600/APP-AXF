@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block extCSS %}
+    <link rel="stylesheet" href="{% static 'user/register.css' %}">
+{% endblock %}
+
+{% block extJS %}
+    <link rel="stylesheet" href="{% static 'user/register.js' %}">
+{% endblock %}
+
+{% block header %}
+    <header><p>登录</p></header>
+{% endblock %}
+
+{% block content %}
+    <form class="navbar-form navbar-left" action="{% url 'App:loginHandle' %}" role="search" enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+        <div class="form-group" style="margin-top: 50px">
+            <p>用户名:</p>
+            <input type="text" id="username" name="username" class="form-control" placeholder="请输入用户名">
+        </div>
+        <div class="form-group" style="margin-top: 20px">
+            <p>密码:</p>
+            <input type="password" id="password" name="password" class="form-control" placeholder="请输入密码">
+        </div>
+        <button type="submit" style="width: 100%" id="login" name="login" class="btn btn-success">Login</button>
+    </form>
+    <div><a href="{% url 'App:home' %}" class="btn btn-default" style="margin: auto">back home page</a></div>
+{% endblock %}

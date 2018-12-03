@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block extCSS %}
+{#    <link rel="stylesheet" href="{% static 'css/order.css' %}">#}
+{% endblock %}
+
+{% block extJS %}
+    <script>
+        $(function () {
+            $('#pay').click(function () {
+                let orderid = $(this).attr('orderid')
+                let status = '1'
+                console.log(status)
+                $.post('/app/changeorderstatus/',{orderid:orderid,status:status},function (data) {
+                    console.log(data)
+                    if (data.status == 1){
+                        location.href = '/app/mine/'
+                    }else{
+                        console.log(data)
+                    }
+                })
+            })
+        })
+    </script>
+    <script>
+        $.ajaxSetup({
+            data:{csrfmiddlewaretoken:'{{ csrf_token }}'}
+        })
+    </script>
+{% endblock %}
+
+{% block header %}
+    <header><div>订单</div></header>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <p>订单number:{{ order.orderid }}</p>
+        <p>订单price:{{ order.price }}</p>
+        <ul>
+            {% for ordergoods in order.ordergoods_set.all %}
+                <li>
+                    <img src="{{ ordergoods.goods.productimg }}" alt="">
+                </li>
+            {% endfor %}
+        </ul>
+    <button id="pay" class="btn btn-success" orderid="{{ order.id }}">付款</button>
+    </div>
+{% endblock %}

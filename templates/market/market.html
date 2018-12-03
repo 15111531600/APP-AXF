@@ -1,0 +1,135 @@
+{% extends 'base_main.html' %}
+
+{% load static %}
+{% block title %}
+    market
+{% endblock %}
+{% block extJS %}
+    <script>
+        {% comment %}jia = document.getElementsByClassName("jia");
+        console.log(jia.length);
+        function zheng(){
+        for(var i=0;i<jia.length;i++){
+        console.log(i);
+        num = document.getElementsByClassName('num')[i].innerHTML;
+        num++;
+          document.getElementsByClassName('num')[i].innerHTML = num;
+            }
+       }{% endcomment %}
+        $(function () {
+            $('.reduce').click(function () {
+                let numNode = $(this).next();
+                if (parseInt(numNode.html()) >= 2) {
+                    numNode.html(parseInt(numNode.html()) - 1);
+                }
+            });
+
+            $('.add').click(function () {
+                let numNode = $(this).prev();
+                numNode.html(parseInt(numNode.html()) + 1);
+            });
+
+            $('.addtocart').click(function () {
+                let num = $(this).prev().find('.num').text();
+                let goodid = $(this).attr('goodid');
+                $.get('/app/cartadd/', {goodid: goodid, num: num}, function (data) {
+                    let obj = data;
+                    if (obj.status == 1) {
+                        console.log(obj.msg)
+                        alert(obj.msg)
+                    } else if (obj.status == 0) {
+                        console.log(obj.msg)
+                        let res = confirm('您尚未登录，是否前往登录');
+                        if (res) {
+                            location.href = '/app/login/'
+                        }
+                    }
+                })
+            })
+        });
+    </script>
+
+    <script src="{% static 'app/market/market.js' %}"></script>
+{% endblock %}
+{% block extCSS %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'app/market/market.css' %}">
+{% endblock %}
+{% block header %}
+    <header>
+        <div style="margin: auto">market</div>
+    </header>
+{% endblock %}
+
+{% block content %}
+    <div id="market">
+        <aside>
+            <ul>
+                {% for type in types %}
+                    <li>
+                        <a href="{% url 'App:market' type.typeid '0' '0' %}">{{ type.typename }}</a>
+                        {% if foodtype == type.typeid %}
+                            <span class="yellowSlide"></span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </aside>
+        <div>
+            <section>
+                <nav>
+                    <ul>
+                        <li id="alltype"><span>全部类型<span id="adown" class="glyphicon glyphicon-chevron-down"
+                                                         style="float: right"></span></span></li>
+                        <li id="allsort"><span>综合排序<span id="sdown" class="glyphicon glyphicon-chevron-down"
+                                                         style="float: right"></span></span></li>
+                    </ul>
+                </nav>
+                <menu>
+                    <ul>
+                        {% for good in goods %}
+                            <li>
+                                <a href="#">
+                                    <img src="{{ good.productimg }}" alt="">
+                                    <div class="shoppingInfo">
+                                        <h6>{{ good.productlongname }}</h6>
+                                        <div class="detailTag"><span>special</span></div>
+                                        <div class="unit">{{ good.specifics }}</div>
+                                        <div class="price"><span>${{ good.price }}</span><s>${{ good.marketprice }}</s>
+                                        </div>
+                                    </div>
+                                </a>
+                                <section>
+                                    <button class="reduce">-</button>
+                                    <span class="num">1</span>
+                                    <button class="add">+</button>
+                                </section>
+                                <button class="addtocart" goodid="{{ good.id }}" style="font-size: 12px">加入购物车</button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <div id="alltypecontainer">
+                        <div>
+                            {% for child in childs %}
+                                <a href="{% url 'App:market' foodtype child.1 '0' %}"><span>{{ child.0 }}</span></a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div id="sortcontainer">
+                        <div>
+                            <a href="{% url 'App:market' foodtype childid '0' %}"><span>综合排序</span></a>
+                            <a href="{% url 'App:market' foodtype childid '1' %}"><span>销量排序</span></a>
+                            <a href="{% url 'App:market' foodtype childid '2' %}"><span>价格降序</span></a>
+                            <a href="{% url 'App:market' foodtype childid '3' %}"><span>价格升序</span></a>
+                        </div>
+                    </div>
+                </menu>
+            </section>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+
+

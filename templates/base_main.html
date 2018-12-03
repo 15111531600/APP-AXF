@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block extCSS %}
+    <link rel="stylesheet" href="{% static 'css/base_main.css' %}">
+{% endblock %}
+{% block header %}
+    <header></header>
+{% endblock %}
+
+
+
+{% block footer %}
+    <footer>
+        <a href="{% url 'App:home' %}" class="home">
+            <dl>
+                <dt><span></span></dt>
+                <dd>home</dd>
+            </dl>
+        </a>
+        <a href="{% url 'App:market' '104749' '0' '0' %}" class="market">
+            <dl>
+                <dt><span></span></dt>
+                <dd>market</dd>
+            </dl>
+        </a>
+
+        <a href="{% url 'App:cart' %}" class="cart">
+            <dl>
+                <dt><span></span></dt>
+                <dd>cart</dd>
+            </dl>
+        </a>
+
+        <a href="{% url 'App:mine' %}" class="mine">
+            <dl>
+                <dt><span></span></dt>
+                <dd>mine</dd>
+            </dl>
+        </a>
+    </footer>
+{% endblock %}

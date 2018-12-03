@@ -1,0 +1,200 @@
+{% extends 'base_main.html' %}
+
+{% load static %}
+{% block title %}
+    cart
+{% endblock %}
+
+{% block extCSS %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'app/cart/cart.css' %}">
+{% endblock %}
+
+{% block extJS %}
+    <script>
+        $(function () {
+            $('.reduce').click(function () {
+                let cartid = $(this).parents('.menuList').attr('cartid');
+                console.log(cartid);
+                var that = this;
+                $.post('/app/cartnumreduce/',{cartid:cartid},function (data) {
+                    if (data.status == 1){
+                        console.log(data)
+                        $(that).next().html(data.num)
+                        calculateTotalprice()
+                    }else{
+                        console.log(data)
+                    }
+                })
+            });
+
+            $('.add').click(function () {
+                let cartid = $(this).parents('.menuList').attr('cartid');
+                console.log(cartid);
+                var that = this;
+                $.get('/app/cartnumadd/',{cartid:cartid},function (data) {
+                    console.log(data)
+                    if (data.status == 1){
+                        $(that).prev().html(data.num)
+                        calculateTotalprice()
+                    }else{
+                        console.log(data)
+                    }
+                })
+            });
+
+            $('.delbtn').click(function () {
+                let cartid = $(this).parents('.menuList').attr('cartid');
+                console.log(cartid);
+                var that = this;
+                $.post('/app/cartdel/',{cartid:cartid},function (data) {
+                    console.log(data);
+                    if (data.status == 1){
+                        $(that).parents('.menuList').remove()
+                        calculateTotalprice()
+                    }else{
+                        console.log(data)
+                    }
+                })
+            })
+
+            $('.select').click(function () {
+                let cartid = $(this).parents('.menuList').attr('cartid');
+                console.log(cartid);
+                var that = this;
+                $.post('/app/cartselect/',{cartid:cartid},function (data) {
+                    console.log(data);
+                    if (data.status == 1){
+                        $(that).find('span').html(data.selected?'√':'')
+                        calculateTotalprice()
+                    }else{
+                        console.log(data)
+                    }
+                })
+            })
+
+            $('#select_all').click(function () {
+                // 获取当前的全选状态是否为全选
+                let isAllSelect = $(this).find('span').html() ? 1 : 0;
+                console.log(isAllSelect)
+                $.post('/app/cartselectall/', {isAllSelect: isAllSelect}, function (data) {
+                    // console.log(data);
+                let obj = data;
+                if (obj.status == 1) {
+                    console.log(obj)
+                    $('#select_all,.select').find('span').html(obj.selectall ? "√" : "");
+                    {#$('#select_all,.select').find('span').html(isAllSelect ? "" : "√");#}
+
+                    // 计算总价
+                    calculateTotalprice();
+                    }else{
+                    console.log(obj)
+                    }
+                });
+            });
+
+            function calculateTotalprice() {
+                var total = 0
+
+                $('.menuList').each(function () {
+                    let price = $(this).find('.price').html()
+                    let num =  $(this).find('.num').html()
+                    if ($(this).find('.select').find('span').html()){
+                        total += parseFloat(price) * parseInt(num)
+                    }
+                })
+                $('#total').html(total.toFixed(2))
+            }
+            calculateTotalprice()
+
+            $('#calulate').click(function () {
+                $.post('/app/orderadd/',function (data) {
+                    console.log(data)
+                    if (data.status == 1){
+                        console.log(data.orderid)
+                        location.href = '/app/order/' + data.orderid + '/';
+
+                    }else{
+                        console.log(data)
+                    }
+                })
+            })
+        })
+    </script>
+    <script>
+        $.ajaxSetup({
+            data:{csrfmiddlewaretoken:'{{ csrf_token }}'}
+        })
+    </script>
+{% endblock %}
+
+{% block header %}
+    <header>
+        <div style="margin: auto">cart</div>
+    </header>
+{% endblock %}
+{% block content %}
+    {% if username %}
+        <div id="cart">
+            <div class="full">
+                <section>
+                    <ul>
+                        <li>收货人：{{ username }}</li>
+                        <li>联系方式：110</li>
+                        <li>收货地址：大学城</li>
+                    </ul>
+                    <div>
+                        <ul>
+                            {% for cart in carts %}
+                                <li class="menuList" cartid="{{ cart.id }}">
+                                    <div class="confirm">
+                                        <span class="select">
+                                            {% if cart.selected %}
+                                                <span>√</span>
+                                                {% else %}
+                                                <span></span>
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <a href="#">
+                                        <img src="{{ cart.goods.productimg }}" alt="">
+                                        <p>{{ cart.goods.productlongname }}</p>
+                                        <p>$<span class="price">{{ cart.goods.price }}</span></p>
+                                    </a>
+                                    <section>
+                                        <button class="reduce">-</button>
+                                        <span class="num">{{ cart.num }}</span>
+                                        <button class="add">+</button>
+                                    </section>
+                                    <button class="delbtn">删除</button>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="payTheBill">
+                            <div class="confirm">
+                            <span id="select_all">
+                                <span></span>
+                            </span>
+                            </div>
+                            <p>全选</p>
+                            <p>
+                                总价：
+                                <span id="total">0.00</span>
+                            </p>
+                            <a href="#" id="calulate">结算</a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    {% else %}
+        <script>
+            let res = confirm('您尚未登录，是否前往登录');
+            if (res) {
+                location.href = '/app/login/'
+            } else {
+                location.href = '/app/home/'
+            }
+        </script>
+    {% endif %}
+{% endblock %}

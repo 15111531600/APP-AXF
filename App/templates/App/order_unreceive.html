@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block extCSS %}
+    <link rel="stylesheet" href="{% static 'css/order_unreceive.css' %}">
+{% endblock %}
+
+{% block extJS %}
+    <script>
+        $(function () {
+            $('.receive').click(function () {
+                let that = this
+                let ordersid = $(this).attr('ordersid')
+                $.post('/app/orderget/',{ordersid:ordersid},function (data) {
+                    console.log(data)
+                    if(data.status == 1){
+                        $(that).parents('.goods_list').remove()
+                    }else{
+                        console.log(data)
+                    }
+                })
+            })
+        })
+    </script>
+    <script>
+        $.ajaxSetup({
+            data:{csrfmiddlewaretoken:'{{ csrf_token }}'}
+        })
+    </script>
+{% endblock %}
+
+{% block header %}
+    <header><div>待收货</div></header>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <ul>
+            {% for foo in orders %}
+                <li class="goods_list">
+                    <p>订单number:{{ foo.orderid }}</p>
+                    <p>订单price:{{ foo.price }}</p>
+                    {% for ordergoods in foo.ordergoods_set.all %}
+                    <img src="{{ ordergoods.goods.productimg }}" alt="">
+                    {% endfor %}
+                    <br>
+                    <button class="receive" ordersid="{{ foo.id }}">收货</button>
+                </li>
+            {% endfor %}
+        </ul>
+        <br><br><br><br><br>
+        <a href="{% url 'App:mine' %}"  class="btn btn-success" style="width: 100%">back</a>
+    </div>
+{% endblock %}

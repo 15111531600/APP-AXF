@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block extCSS %}
+    <link rel="stylesheet" href="{% static 'user/register.css' %}">
+{% endblock %}
+
+{% block extJS %}
+    {#    <link rel="stylesheet" href="{% static 'user/register.js' %}">#}
+    <script>
+        $(function () {
+            $('#username').blur(function () {
+                console.log(virifyUser())
+                if (virifyUser()) {
+                    {#$('#nameTips').css('color', 'green');#}
+                    {#$('#nameTips').html('用户名合法')#}
+                } else {
+
+                }
+            });
+            function virifyUser(){
+                if (/^[a-zA-Z_]\w{5,17}$/.test($('#username').val())) {
+                    $.get('/app/check/',{username: $('#username').val()},function (data) {
+                        console.log(data)
+                        if (data.status == '1'){
+                            $('#nameTips').css('color', 'green');
+                            $('#nameTips').html('用户名可用');
+                            return true
+                        }else if(data.status == '0'){
+                            $('#nameTips').css('color', 'red');
+                            $('#nameTips').html('用户名已存在');
+                            return false
+                        }else if(data.status == '-1'){
+                            $('#nameTips').css('color', 'red');
+                            $('#nameTips').html(data.msg);
+                            return false
+                        }
+                    });
+                }else{
+                    $('#nameTips').css('color', 'red');
+                    $('#nameTips').html('用户名不合法')
+                    return false
+                }
+            }
+            $('#password').blur(function () {
+                if (virifypassword()) {
+                    $('#psdTips').css('color', 'green');
+                    $('#psdTips').html('密码合法')
+                }else {
+                    $('#psdTips').css('color', 'red');
+                    $('#psdTips').html('密码不合法')
+                }
+            });
+            function virifypassword(){
+                if (/^.{8,}$/.test($('#password').val())){
+                    return true
+                }else{
+                    return false
+                }
+            }
+            $('#repassword').blur(function () {
+                if (!virifyrepassword()) {
+                    $('#repsdTips').css('color', 'red');
+                    $('#repsdTips').html('两次密码不一致')
+                } else {
+                    $('#repsdTips').css('color', 'green');
+                    $('#repsdTips').html('两次密码一致')
+                }
+            });
+            function virifyrepassword(){
+                if ($('#repassword').val() != $('#password').val()){
+                    return false
+                }else{
+                    return true
+                }
+            }
+            $('#email').blur(function () {
+                if (virifyemail()) {
+                    $('#emailTips').css('color', 'green');
+                    $('#emailTips').html('邮箱合法')
+                } else {
+                    $('#emailTips').css('color', 'red');
+                    $('#emailTips').html('邮箱不合法')
+                }
+            });
+            function virifyemail(){
+                if (/^\w+@\w+(\.[a-zA-Z0-9]+)*\.[a-zA-Z0-9]{2,6}$/.test($('#email').val())){
+                    return true
+                }else{
+                    return false
+                }
+            }
+            $('#register').click(function () {
+                console.log($('#nameTips').html())
+                if (virifyrepassword() && virifyemail() && virifypassword() && $('#nameTips').html()=='用户名可用'){
+                    return true
+                }else{
+                    return false
+                }
+            })
+        });
+    </script>
+{% endblock %}
+
+{% block header %}
+    <header><p>注册</p></header>
+{% endblock %}
+
+{% block content %}
+    <form class="navbar-form navbar-left" action="{% url 'App:registerHandle' %}" role="search"
+          enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        <div class="form-group" style="margin-top: 50px">
+            <p>用户名:</p>
+            <input type="text" id="username" name="username" class="form-control" placeholder="6-18位的数字字母下划线,不能以数字开头">
+            <p id="nameTips" style="color: red"></p>
+        </div>
+        <div class="form-group" style="margin-top: 20px">
+            <p>密码:</p>
+            <input type="password" id="password" name="password" class="form-control" placeholder="8位以上字符">
+            <p id="psdTips" style="color: red"></p>
+        </div>
+        <div class="form-group" style="margin-top: 20px">
+            <p>确认密码:</p>
+            <input type="password" id="repassword" name="repassword" class="form-control" placeholder="请再次输入密码">
+            <p id="repsdTips" style="color: red"></p>
+        </div>
+        <div class="form-group" style="margin-top: 20px">
+            <p>邮箱:</p>
+            <input type="text" id="email" name="email" class="form-control" placeholder="请输入合法的邮箱">
+            <p id="emailTips" style="color: red"></p>
+        </div>
+        <div class="form-group" style="margin-top: 20px">
+            <p>头像:</p>
+            <input type="file" id="files" name="files">
+            <p id="iconTips" style="color: red"></p>
+        </div>
+        <button type="submit" style="width: 100%" id="register" name="register" class="btn btn-success">Register
+        </button>
+    </form>
+    <div><a href="{% url 'App:home' %}" class="btn btn-default" style="margin: auto">back home page</a></div>
+{% endblock %}
+
